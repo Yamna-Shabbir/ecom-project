@@ -1,0 +1,11 @@
+# Secrets & env (keep .env.example as template only)
+.env
+.env.*
+!.env.example
+
+# Uploads (user content)
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+*.log

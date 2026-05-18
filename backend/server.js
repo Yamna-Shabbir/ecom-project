@@ -39,6 +39,14 @@ app.use(
   })
 );
 
+app.get("/", (req, res) => {
+  res.json({
+    message: "Gulkaar API is running",
+    health: "/api/health",
+    hint: "Open your Netlify site for the shop UI.",
+  });
+});
+
 app.get("/api/health", (req, res) => {
   res.json({
     ok: true,
