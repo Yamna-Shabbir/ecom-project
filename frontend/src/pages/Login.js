@@ -28,11 +28,16 @@ function Login() {
     } catch (err) {
       if (!err.response) {
         setError(
-          "Cannot reach the server. Wait 30s if the API just woke up, then try again. " +
-            "(Check Netlify env REACT_APP_API_URL and redeploy.)"
+          "Cannot reach the API. Wait 30s (Render free tier wakes slowly), then try again."
+        );
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.response.status === 404) {
+        setError(
+          "API not found (404). Push latest code to GitHub and redeploy Netlify with netlify.toml proxy."
         );
       } else {
-        setError(err.response?.data?.message || "Something went wrong.");
+        setError(`Login failed (${err.response.status}). Check Render is live and redeploy Netlify.`);
       }
     } finally {
       setLoading(false);
