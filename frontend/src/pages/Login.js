@@ -26,7 +26,14 @@ function Login() {
         navigate(res.data.role === "admin" ? "/dashboard" : "/shop");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong.");
+      if (!err.response) {
+        setError(
+          "Cannot reach the server. Wait 30s if the API just woke up, then try again. " +
+            "(Check Netlify env REACT_APP_API_URL and redeploy.)"
+        );
+      } else {
+        setError(err.response?.data?.message || "Something went wrong.");
+      }
     } finally {
       setLoading(false);
     }

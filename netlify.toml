@@ -1,4 +1,4 @@
-# Netlify — React app lives in /frontend
+# Netlify — React app in /frontend; API proxied to Render (avoids CORS)
 [build]
   base = "frontend"
   command = "npm install && npm run build"
@@ -8,6 +8,19 @@
   NODE_VERSION = "20"
   CI = "false"
   GENERATE_SOURCEMAP = "false"
+  REACT_APP_API_URL = "https://soft-belekoy-90fce7.netlify.app"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://ecom-project-tjkq.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/uploads/*"
+  to = "https://ecom-project-tjkq.onrender.com/uploads/:splat"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
