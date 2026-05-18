@@ -8,7 +8,7 @@
   NODE_VERSION = "20"
   CI = "false"
   GENERATE_SOURCEMAP = "false"
-  REACT_APP_API_URL = "https://soft-belekoy-90fce7.netlify.app"
+  REACT_APP_API_URL = "https://ecom-project-tjkq.onrender.com"
 
 [[redirects]]
   from = "/api/*"

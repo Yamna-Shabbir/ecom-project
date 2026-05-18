@@ -33,9 +33,7 @@ function Login() {
       } else if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else if (err.response.status === 404) {
-        setError(
-          "API not found (404). Push latest code to GitHub and redeploy Netlify with netlify.toml proxy."
-        );
+        setError("API not found (404). Set REACT_APP_API_URL to your Render URL and redeploy Netlify.");
       } else {
         setError(`Login failed (${err.response.status}). Check Render is live and redeploy Netlify.`);
       }
