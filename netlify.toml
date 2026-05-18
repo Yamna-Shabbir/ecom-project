@@ -1,11 +1,11 @@
-# Netlify settings for the React frontend (Create React App)
+# Netlify — leave "Base directory" empty in the UI; use these settings
 [build]
-  base = "frontend"
   command = "npm run build"
-  publish = "build"
+  publish = "frontend/build"
 
 [build.environment]
   NODE_VERSION = "20"
+  CI = "false"
 
 # React Router — all routes serve index.html
 [[redirects]]

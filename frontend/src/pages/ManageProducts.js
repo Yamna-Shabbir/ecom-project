@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { API_URL, apiPath, resolveImageUrl } from "../config/api";
+import { apiPath, resolveImageUrl } from "../config/api";
 import SeoHead from "../components/SeoHead";
 
 const CATEGORY_OPTIONS = ["Flowers", "Laptop Accessories", "Hair Accessories", "Scarfs"];

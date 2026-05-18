@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { API_URL, apiPath, resolveImageUrl } from "../config/api";
+import { API_URL, apiPath } from "../config/api";
 import { useNavigate } from "react-router-dom";
 
 

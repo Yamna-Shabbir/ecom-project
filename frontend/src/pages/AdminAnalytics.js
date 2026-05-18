@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { API_URL, apiPath, resolveImageUrl } from "../config/api";
+import { API_URL } from "../config/api";
 import { Link } from "react-router-dom";
 import {
   Area,
@@ -18,8 +18,6 @@ import {
   YAxis,
 } from "recharts";
 import SeoHead from "../components/SeoHead";
-
-// API_URL from config/api
 
 const CHART_COLORS = ["#8B5E4B", "#C9A88A", "#E8C4B8", "#6B4423", "#D4A574", "#A67B5B", "#F0D9CE", "#4b2e20"];
 

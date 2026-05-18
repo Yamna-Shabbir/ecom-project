@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { API_URL, apiPath, resolveImageUrl } from "../config/api";
+import { apiPath } from "../config/api";
 import { Link } from "react-router-dom";
 import SeoHead from "../components/SeoHead";
 

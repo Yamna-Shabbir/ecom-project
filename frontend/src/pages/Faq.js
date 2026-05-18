@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { API_URL, apiPath, resolveImageUrl } from "../config/api";
+import { API_URL } from "../config/api";
 import SeoHead from "../components/SeoHead";
-
-// API_URL from config/api
 
 function Faq() {
   const [top, setTop] = useState([]);
