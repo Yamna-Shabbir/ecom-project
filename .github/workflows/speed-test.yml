@@ -1,0 +1,44 @@
+name: Speed test
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      site_url:
+        description: "Frontend URL to test"
+        required: true
+        default: "https://gulkaar-web.onrender.com"
+      api_url:
+        description: "Backend API URL"
+        required: true
+        default: "https://gulkaar-api.onrender.com"
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install speed-test dependencies
+        run: npm install
+
+      - name: Run Lighthouse speed test
+        env:
+          SITE_URL: ${{ github.event.inputs.site_url || 'https://gulkaar-web.onrender.com' }}
+          API_URL: ${{ github.event.inputs.api_url || 'https://gulkaar-api.onrender.com' }}
+        run: npm run speed-test
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: reports/lighthouse-report.html

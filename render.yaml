@@ -1,0 +1,42 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# 1. Push repo to GitHub
+# 2. Render Dashboard → New → Blueprint → connect repo
+# 3. Set secret env vars (MONGO_URI, API keys, Stripe) in the dashboard
+
+services:
+  - type: web
+    name: gulkaar-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false
+      - key: CLIENT_URL
+        value: https://gulkaar-web.onrender.com
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: XAI_API_KEY
+        sync: false
+      - key: AI_PROVIDER
+        value: openai
+      - key: STRIPE_SECRET_KEY
+        sync: false
+
+  - type: web
+    name: gulkaar-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://gulkaar-api.onrender.com
+      - key: REACT_APP_STRIPE_PUBLISHABLE_KEY
+        sync: false
