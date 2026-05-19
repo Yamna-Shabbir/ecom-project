@@ -7,6 +7,7 @@ const Product = require("../models/Product");
 const Order = require("../models/Order");
 const ProductEvent = require("../models/ProductEvent");
 const { generateProductSeo } = require("../services/productSeoAi");
+const { saveProductImage } = require("../utils/productImages");
 
 const router = express.Router();
 
@@ -34,36 +35,43 @@ function sanitizeSearchText(q) {
     .trim();
 }
 
-// Configure multer storage for product images
+// Disk folder kept for older uploads; new uploads go to MongoDB GridFS (survives Render restarts)
 const uploadDir = path.join(__dirname, "..", "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, `product-${uniqueSuffix}${ext}`);
-  },
-});
-
 const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype || !file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed"));
+    }
+    cb(null, true);
+  },
 });
 
-// Upload product image (Admin only)
-router.post("/upload", upload.single("image"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
+// Upload product image → stored in MongoDB (persists on Render free tier)
+router.post("/upload", upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
 
-  const imageUrl = `/uploads/${req.file.filename}`;
-  res.json({ imageUrl });
+    const ext = path.extname(req.file.originalname) || ".jpg";
+    const filename = `product-${Date.now()}${ext}`;
+    const fileId = await saveProductImage(
+      req.file.buffer,
+      filename,
+      req.file.mimetype
+    );
+
+    res.json({ imageUrl: `/api/files/${fileId}` });
+  } catch (err) {
+    console.error("Image upload error:", err.message);
+    res.status(500).json({ message: "Image upload failed", error: err.message });
+  }
 });
 
 // Add Product (Admin only)

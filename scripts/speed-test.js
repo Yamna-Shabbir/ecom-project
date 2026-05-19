@@ -10,7 +10,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const lighthouse = require("lighthouse");
+const lighthouse = require("lighthouse").default;
 const chromeLauncher = require("chrome-launcher");
 
 const SITE_URL = (process.env.SITE_URL || "http://localhost:3000").replace(/\/$/, "");

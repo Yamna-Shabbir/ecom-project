@@ -8,13 +8,16 @@ function normalizeProvider(v) {
   return s;
 }
 
-const openai = process.env.OPENAI_API_KEY
-  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const openaiKey = (process.env.OPENAI_API_KEY || "").trim();
+const xaiKey = (process.env.XAI_API_KEY || "").trim();
+
+const openai = openaiKey
+  ? new OpenAI({ apiKey: openaiKey })
   : null;
 
-const xai = process.env.XAI_API_KEY
+const xai = xaiKey
   ? new OpenAI({
-      apiKey: process.env.XAI_API_KEY,
+      apiKey: xaiKey,
       baseURL: "https://api.x.ai/v1",
     })
   : null;

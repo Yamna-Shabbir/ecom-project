@@ -3,6 +3,7 @@ import axios from "axios";
 import { apiPath } from "../config/api";
 import { useParams } from "react-router-dom";
 import SeoHead from "../components/SeoHead";
+import ProductImage from "../components/ProductImage";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -64,12 +65,16 @@ function ProductDetails() {
         <h1>{product.name}</h1>
         <p>{product.category} · {product.brand}</p>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 24 }}>
+      <div className="product-detail-layout">
         <div>
-          {product.image ? <img src={product.image} alt={product.imageAlt || product.name} style={{ width: "100%", borderRadius: 8 }} /> : <div className="product-card-img-placeholder">🧶</div>}
+          <ProductImage
+            image={product.image}
+            alt={product.imageAlt || product.name}
+            className="product-detail-image"
+          />
         </div>
-        <div>
-          <p style={{ marginBottom: 10 }}>{product.description}</p>
+        <div className="product-detail-info">
+          <p>{product.description}</p>
           <p><strong>Price:</strong> ${product.price}</p>
           <p><strong>Rating:</strong> {product.rating || 0}/5</p>
         </div>

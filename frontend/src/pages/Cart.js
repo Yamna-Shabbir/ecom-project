@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { apiPath } from "../config/api";
+import ProductImage from "../components/ProductImage";
 
 function Cart() {
   const [cart, setCart] = useState([]);
@@ -165,11 +166,12 @@ function Cart() {
         <div>
           {cart.map((p) => (
             <div className="cart-item" key={p._id}>
-              {p.image ? (
-                <img src={p.image} alt={p.name} />
-              ) : (
-                <div className="cart-item-placeholder">🧶</div>
-              )}
+              <ProductImage
+                image={p.image}
+                alt={p.name}
+                className="cart-item-img"
+                placeholderClassName="cart-item-placeholder"
+              />
               <div className="cart-item-info">
                 <h3>{p.name}</h3>
                 <p>${p.price} each</p>
@@ -179,8 +181,8 @@ function Cart() {
                   <button onClick={() => updateQuantity(p._id, p.quantity + 1)}>+</button>
                 </div>
               </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.3rem", color: "var(--rose)", marginBottom: 12 }}>
+              <div className="cart-item-actions">
+                <div className="cart-item-price">
                   ${(p.price * p.quantity).toFixed(2)}
                 </div>
                 <button className="btn-danger" onClick={() => removeItem(p._id)}>Remove</button>
@@ -206,7 +208,7 @@ function Cart() {
             <div style={{ fontSize: "0.78rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-light)", marginBottom: 8 }}>
               Coupons
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div className="coupon-row">
               <input
                 placeholder="SAVE10 / SAVE20"
                 value={couponCode}
@@ -300,7 +302,7 @@ function Cart() {
             <div style={{ fontSize: "0.78rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-light)", marginBottom: 8 }}>
               Payment Method
             </div>
-            <div style={{ display: "flex", gap: 10 }}>
+            <div className="payment-method-row">
               <button
                 type="button"
                 className="btn-ghost"

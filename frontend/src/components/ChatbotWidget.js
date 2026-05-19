@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { API_URL, apiPath } from "../config/api";
+import { apiPath, resolveImageUrl } from "../config/api";
 import { useNavigate } from "react-router-dom";
 
 
@@ -11,13 +11,6 @@ function normalize(text) {
 
 function getSpeechRecognition() {
   return window.SpeechRecognition || window.webkitSpeechRecognition || null;
-}
-
-function productImageUrl(image) {
-  if (!image) return null;
-  if (/^https?:\/\//i.test(image)) return image;
-  const path = image.startsWith("/") ? image : `/${image}`;
-  return `${API_URL}${path}`;
 }
 
 function getCart() {
@@ -37,6 +30,7 @@ function ChatbotWidget() {
   const [speakReplies, setSpeakReplies] = useState(() => localStorage.getItem("chatbotSpeakReplies") === "1");
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
+  const [, setAiReady] = useState(true);
   const [messages, setMessages] = useState([
     {
       sender: "bot",
@@ -69,6 +63,26 @@ function ChatbotWidget() {
     setMessages((prev) => [...prev, { sender: "bot", text, products }]);
     speak(text);
   };
+
+  useEffect(() => {
+    axios
+      .get(apiPath("/api/chatbot/status"))
+      .then((res) => {
+        const ok = Boolean(res.data?.configured);
+        setAiReady(ok);
+        if (!ok) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "bot",
+              text:
+                "Note: AI answers need an API key on Render (OPENAI_API_KEY + AI_PROVIDER=openai). Product search and cart commands still work.",
+            },
+          ]);
+        }
+      })
+      .catch(() => setAiReady(false));
+  }, []);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -238,9 +252,16 @@ function ChatbotWidget() {
       });
       const reply = res.data.reply || "Sorry, I could not process that.";
       const products = Array.isArray(res.data.products) ? res.data.products : [];
+      if (res.data.aiConfigured === false) setAiReady(false);
       pushBot({ text: reply, products });
     } catch (err) {
-      pushBot({ text: "Server error. Please try again.", products: [] });
+      const msg =
+        err.response?.data?.reply ||
+        err.response?.data?.message ||
+        (err.response?.status === 404
+          ? "Chat API not found. Redeploy the backend on Render."
+          : "Server error. Wait ~30s if Render was sleeping, then try again.");
+      pushBot({ text: msg, products: [] });
     } finally {
       setLoading(false);
     }
@@ -294,10 +315,10 @@ function ChatbotWidget() {
                         className="chatbot-product-chip"
                         onClick={() => openProduct(p._id)}
                       >
-                        {productImageUrl(p.image) ? (
+                        {resolveImageUrl(p.image) ? (
                           <img
                             className="chatbot-product-chip-img"
-                            src={productImageUrl(p.image)}
+                            src={resolveImageUrl(p.image)}
                             alt=""
                           />
                         ) : (

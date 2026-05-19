@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { apiPath } from "../config/api";
 import { useNavigate, Link } from "react-router-dom";
+import { validateEmail } from "../utils/validateEmail";
 import logo from "../logo.jpeg";
 
 function Login() {
@@ -14,9 +15,16 @@ function Login() {
   const loginUser = async () => {
     setError("");
     if (!email || !password) return setError("Please fill in all fields.");
+
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.ok) return setError(emailCheck.message);
+
     setLoading(true);
     try {
-      const res = await axios.post(apiPath("/api/auth/login"), { email, password });
+      const res = await axios.post(apiPath("/api/auth/login"), {
+        email: emailCheck.email,
+        password,
+      });
       if (res.data.message) {
         setError(res.data.message);
       } else {

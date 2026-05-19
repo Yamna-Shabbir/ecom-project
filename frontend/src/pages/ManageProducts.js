@@ -358,7 +358,8 @@ function ManageProducts() {
             }}
           />
           <p style={{ fontSize: "0.78rem", color: "var(--text-light)", marginTop: 6 }}>
-            You can also paste an image URL directly if you prefer.
+            Uploads are saved in the database (they survive Render restarts). You can also paste a public image URL.
+            If old images broke after deploy, edit each product and re-upload the photo.
           </p>
           <input
             style={{ marginTop: 8 }}
@@ -413,7 +414,7 @@ function ManageProducts() {
                 <tr key={p._id}>
                   <td>
                     {p.image ? (
-                      <img src={p.image} alt={p.name} style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 3 }} />
+                      <img src={resolveImageUrl(p.image)} alt={p.name} style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 3 }} />
                     ) : (
                       <div style={{ width: 56, height: 56, background: "var(--blush)", borderRadius: 3, display: "flex", alignItems: "center", justifyContent: "center" }}>🧶</div>
                     )}

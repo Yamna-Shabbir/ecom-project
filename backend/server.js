@@ -16,6 +16,7 @@ const orderWebhook = require("./routes/orderWebhook");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const chatbotRoutes = require("./routes/chatbotRoutes");
 const supportRoutes = require("./routes/supportRoutes");
+const fileRoutes = require("./routes/fileRoutes");
 
 const app = express();
 
@@ -48,10 +49,16 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/health", (req, res) => {
+  const hasOpenAi = Boolean(process.env.OPENAI_API_KEY?.trim());
+  const hasXai = Boolean(process.env.XAI_API_KEY?.trim());
   res.json({
     ok: true,
     env: process.env.NODE_ENV || "development",
     mongo: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    ai: {
+      configured: hasOpenAi || hasXai,
+      provider: process.env.AI_PROVIDER || (hasXai ? "xai" : hasOpenAi ? "openai" : null),
+    },
   });
 });
 
@@ -65,6 +72,7 @@ const uploadsPath = path.join(__dirname, "uploads");
 app.use("/uploads", express.static(uploadsPath));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/files", fileRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/wishlist", wishlistRoutes);

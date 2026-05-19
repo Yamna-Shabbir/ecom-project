@@ -12,19 +12,28 @@ function normalizeProvider(v) {
   return s;
 }
 
-// Initialize AI clients (OpenAI + xAI via OpenAI-compatible baseURL)
-const openai = process.env.OPENAI_API_KEY
-  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  : null;
+const openaiKey = (process.env.OPENAI_API_KEY || "").trim();
+const xaiKey = (process.env.XAI_API_KEY || "").trim();
 
-const xai = process.env.XAI_API_KEY
+const openai = openaiKey ? new OpenAI({ apiKey: openaiKey }) : null;
+
+const xai = xaiKey
   ? new OpenAI({
-      apiKey: process.env.XAI_API_KEY,
+      apiKey: xaiKey,
       baseURL: "https://api.x.ai/v1",
     })
   : null;
 
 const router = express.Router();
+
+const AI_SETUP_HINT =
+  "AI is not configured. On Render → your API service → Environment, add OPENAI_API_KEY (and AI_PROVIDER=openai), then Manual Deploy.";
+
+router.get("/status", (req, res) => {
+  const provider = normalizeProvider(process.env.AI_PROVIDER) || (xai ? "xai" : openai ? "openai" : null);
+  const configured = provider === "xai" ? Boolean(xai) : Boolean(openai);
+  res.json({ configured, provider });
+});
 
 // --- Helper Functions ---
 
@@ -206,9 +215,9 @@ router.post("/query", async (req, res) => {
         const client = provider === "xai" ? xai : openai;
         if (!client) {
           return res.json({
-            reply:
-              "AI is not configured yet. Add an API key in backend/.env (XAI_API_KEY or OPENAI_API_KEY) and restart the server.",
+            reply: AI_SETUP_HINT,
             products: [],
+            aiConfigured: false,
           });
         }
 
@@ -243,9 +252,15 @@ router.post("/query", async (req, res) => {
 
       } catch (aiError) {
         console.error("AI API Error:", aiError.message);
+        const invalidKey =
+          aiError.status === 401 ||
+          /invalid.*api.*key|incorrect api key|authentication/i.test(aiError.message || "");
         return res.json({
-          reply: "I'm having trouble accessing my knowledge base right now. For app-related questions (orders, products, shipping), I can still help!",
+          reply: invalidKey
+            ? "The AI API key is invalid or expired. Update OPENAI_API_KEY on Render and redeploy."
+            : "I'm having trouble reaching the AI service right now. For orders, products, and shipping I can still help!",
           products: [],
+          aiError: aiError.message,
         });
       }
     }

@@ -3,6 +3,7 @@ import axios from "axios";
 import { apiPath } from "../config/api";
 import { Link } from "react-router-dom";
 import SeoHead from "../components/SeoHead";
+import ProductImage from "../components/ProductImage";
 
 function Wishlist() {
   const [items, setItems] = useState([]);
@@ -52,7 +53,7 @@ function Wishlist() {
             const p = w.productId;
             return (
               <div className="product-card" key={w._id}>
-                {p?.image ? <img className="product-card-img" src={p.image} alt={p.name} /> : <div className="product-card-img-placeholder">🧶</div>}
+                <ProductImage image={p?.image} alt={p?.name} className="product-card-img" />
                 <div className="product-card-body">
                   <h3>{p?.name}</h3>
                   <p>{p?.description}</p>

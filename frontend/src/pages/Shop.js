@@ -3,6 +3,7 @@ import axios from "axios";
 import { apiPath } from "../config/api";
 import { Link } from "react-router-dom";
 import SeoHead from "../components/SeoHead";
+import ProductImage from "../components/ProductImage";
 
 const CATEGORY_OPTIONS = ["Flowers", "Laptop Accessories", "Hair Accessories", "Scarfs"];
 
@@ -148,11 +149,7 @@ function Shop() {
           <div className="product-grid" style={{ marginTop: 14 }}>
             {frequentlyBought.map((p) => (
               <article className="product-card product-card--listing" key={p._id}>
-                {p.image ? (
-                  <img className="product-card-img" src={p.image} alt={p.name} />
-                ) : (
-                  <div className="product-card-img-placeholder">🧶</div>
-                )}
+                <ProductImage image={p.image} alt={p.name} className="product-card-img" />
                 <div className="product-card-body">
                   <h3 className="product-card-title">{p.name}</h3>
                   {p.description ? <p className="product-card-desc">{p.description}</p> : null}
@@ -198,11 +195,7 @@ function Shop() {
               key={p._id}
               style={{ animationDelay: `${i * 0.07}s` }}
             >
-              {p.image ? (
-                <img className="product-card-img" src={p.image} alt={p.name} />
-              ) : (
-                <div className="product-card-img-placeholder">🧶</div>
-              )}
+              <ProductImage image={p.image} alt={p.name} className="product-card-img" />
               <div className="product-card-body">
                 <h3 className="product-card-title">{p.name}</h3>
                 {p.description ? <p className="product-card-desc">{p.description}</p> : null}

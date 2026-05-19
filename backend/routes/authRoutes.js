@@ -2,17 +2,39 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const { ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME } = require("../config/admin");
+const { validateEmail, normalizeEmail } = require("../utils/validateEmail");
 
 const router = express.Router();
 
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+async function findUserByEmail(rawEmail) {
+  const normalized = normalizeEmail(rawEmail);
+  let user = await User.findOne({ email: normalized });
+  if (!user && normalized) {
+    user = await User.findOne({
+      email: { $regex: new RegExp(`^${escapeRegex(normalized)}$`, "i") },
+    });
+  }
+  return user;
+}
+
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, password } = req.body;
+    const emailCheck = validateEmail(req.body.email);
 
-    if (!name || !email || !password)
+    if (!name || !password)
       return res.status(400).json({ message: "All fields are required" });
 
-    if (email === ADMIN_EMAIL) {
+    if (!emailCheck.ok)
+      return res.status(400).json({ message: emailCheck.message });
+
+    const email = emailCheck.email;
+
+    if (email === normalizeEmail(ADMIN_EMAIL)) {
       return res.status(400).json({ message: "This email is reserved for admin." });
     }
 
@@ -24,7 +46,7 @@ router.post("/register", async (req, res) => {
     const role = "buyer";
 
     const user = new User({
-      name,
+      name: name.trim(),
       email,
       password: hashedPassword,
       role,
@@ -44,16 +66,22 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const emailCheck = validateEmail(req.body.email);
 
-    if (!email || !password)
+    if (!password)
       return res.status(400).json({ message: "All fields are required" });
 
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    if (!emailCheck.ok)
+      return res.status(400).json({ message: emailCheck.message });
+
+    const email = emailCheck.email;
+
+    if (email === normalizeEmail(ADMIN_EMAIL) && password === ADMIN_PASSWORD) {
       return res.json({ name: ADMIN_NAME, email: ADMIN_EMAIL, role: "admin" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await findUserByEmail(email);
     if (!user)
       return res.status(401).json({ message: "User not found" });
 

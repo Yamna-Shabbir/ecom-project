@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { apiPath } from "../config/api";
 import { useNavigate, Link } from "react-router-dom";
+import { validateEmail } from "../utils/validateEmail";
 import logo from "../logo.jpeg";
 
 function Register() {
@@ -19,8 +20,13 @@ function Register() {
     setError("");
     setInfo("");
 
-    if (!name || !email || !password) {
+    if (!name.trim() || !email || !password) {
       return setError("Please fill in all fields.");
+    }
+
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.ok) {
+      return setError(emailCheck.message);
     }
 
     if (password.length < 6) {
@@ -32,12 +38,12 @@ function Register() {
     try {
       const res = await axios.post(
         apiPath("/api/auth/register"),
-        { name, email, password }
+        { name: name.trim(), email: emailCheck.email, password }
       );
 
       // Auto-login after successful registration
       localStorage.setItem("name", res.data.name);
-      localStorage.setItem("email", email);
+      localStorage.setItem("email", emailCheck.email);
       localStorage.setItem("role", res.data.role);
       navigate(res.data.role === "admin" ? "/dashboard" : "/shop");
     } catch (err) {
@@ -91,10 +97,13 @@ function Register() {
               <label>Email</label>
               <input
                 type="email"
-                placeholder="your@email.com"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="you@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
+              <p className="form-hint">Use a real inbox you can access (Gmail, Outlook, Yahoo, etc.).</p>
             </div>
 
             <div className="form-group">
