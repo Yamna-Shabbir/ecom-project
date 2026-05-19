@@ -1,6 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
 import { apiPath } from "../config/api";
+import { api, wakeApi, networkErrorMessage } from "../utils/apiClient";
 import { useNavigate, Link } from "react-router-dom";
 import { validateEmail } from "../utils/validateEmail";
 import logo from "../logo.jpeg";
@@ -21,7 +21,8 @@ function Login() {
 
     setLoading(true);
     try {
-      const res = await axios.post(apiPath("/api/auth/login"), {
+      await wakeApi();
+      const res = await api.post(apiPath("/api/auth/login"), {
         email: emailCheck.email,
         password,
       });
@@ -34,17 +35,7 @@ function Login() {
         navigate(res.data.role === "admin" ? "/dashboard" : "/shop");
       }
     } catch (err) {
-      if (!err.response) {
-        setError(
-          "Cannot reach the API. Wait 30s (Render free tier wakes slowly), then try again."
-        );
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.response.status === 404) {
-        setError("API not found (404). Set REACT_APP_API_URL to your Render URL and redeploy Netlify.");
-      } else {
-        setError(`Login failed (${err.response.status}). Check Render is live and redeploy Netlify.`);
-      }
+      setError(networkErrorMessage(err));
     } finally {
       setLoading(false);
     }

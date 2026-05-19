@@ -8,6 +8,7 @@
   NODE_VERSION = "20"
   CI = "false"
   GENERATE_SOURCEMAP = "false"
+  REACT_APP_USE_SAME_ORIGIN_API = "true"
   REACT_APP_API_URL = "https://ecom-project-tjkq.onrender.com"
 
 [[redirects]]

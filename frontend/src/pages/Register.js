@@ -1,6 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
 import { apiPath } from "../config/api";
+import { api, wakeApi, networkErrorMessage } from "../utils/apiClient";
 import { useNavigate, Link } from "react-router-dom";
 import { validateEmail } from "../utils/validateEmail";
 import logo from "../logo.jpeg";
@@ -36,10 +36,12 @@ function Register() {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        apiPath("/api/auth/register"),
-        { name: name.trim(), email: emailCheck.email, password }
-      );
+      await wakeApi();
+      const res = await api.post(apiPath("/api/auth/register"), {
+        name: name.trim(),
+        email: emailCheck.email,
+        password,
+      });
 
       // Auto-login after successful registration
       localStorage.setItem("name", res.data.name);
@@ -47,7 +49,7 @@ function Register() {
       localStorage.setItem("role", res.data.role);
       navigate(res.data.role === "admin" ? "/dashboard" : "/shop");
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong.");
+      setError(networkErrorMessage(err));
     } finally {
       setLoading(false);
     }
