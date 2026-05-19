@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { apiPath } from "../config/api";
 import SeoHead from "../components/SeoHead";
+import { formatPKR } from "../utils/currency";
 
 function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [reviewDrafts, setReviewDrafts] = useState({});
+  const [productReviewDrafts, setProductReviewDrafts] = useState({});
   const [trackingMap, setTrackingMap] = useState({});
   const [error, setError] = useState("");
 
@@ -31,27 +32,42 @@ function MyOrders() {
     });
   };
 
-  const updateDraft = (id, changes) => {
-    setReviewDrafts((prev) => ({
+  const updateProductDraft = (orderId, productId, changes) => {
+    setProductReviewDrafts((prev) => ({
       ...prev,
-      [id]: { rating: 5, comment: "", ...prev[id], ...changes },
+      [orderId]: {
+        ...prev[orderId],
+        [productId]: { rating: 5, comment: "", ...prev[orderId]?.[productId], ...changes },
+      },
     }));
   };
 
-  const submitReview = async (orderId) => {
-    const draft = reviewDrafts[orderId] || {};
-    if (!draft.rating) {
-      alert("Please select a rating.");
+  const submitReview = async (order) => {
+    const drafts = productReviewDrafts[order._id] || {};
+    const productReviews = (order.products || [])
+      .filter((p) => p.productId)
+      .map((p) => ({
+        productId: p.productId,
+        rating: Number(drafts[p.productId]?.rating || 5),
+        comment: drafts[p.productId]?.comment || "",
+      }));
+
+    if (!productReviews.length) {
+      alert("No products to review.");
       return;
     }
+
     try {
-      const res = await axios.put(apiPath(`/api/orders/${orderId}/review`), {
-        reviewRating: draft.rating,
-        reviewComment: draft.comment || "",
+      const res = await axios.put(apiPath(`/api/orders/${order._id}/review`), {
+        buyerEmail: localStorage.getItem("email"),
+        productReviews,
       });
-      setOrders((prev) => prev.map((o) => (o._id === orderId ? res.data : o)));
+      setOrders((prev) =>
+        prev.map((o) => (o._id === order._id ? res.data.order || res.data : o))
+      );
+      alert("Thank you! Your ratings have been saved.");
     } catch (err) {
-      alert("Failed to submit review.");
+      alert(err.response?.data?.message || "Failed to submit review.");
     }
   };
 
@@ -127,7 +143,7 @@ function MyOrders() {
                     marginTop: 6,
                   }}
                 >
-                  ${o.totalPrice?.toFixed(2)}
+                  {formatPKR(o.totalPrice)}
                 </div>
               </div>
             </div>
@@ -136,7 +152,7 @@ function MyOrders() {
               {trackingMap[o._id]?.length > 0 && (
                 <div style={{ marginBottom: 12, background: "#fff", border: "1px solid var(--blush)", padding: 10, borderRadius: 8 }}>
                   <p style={{ fontSize: "0.75rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-light)", marginBottom: 6 }}>
-                    Tracking Timeline
+                    Delivery timeline (2–3 weeks)
                   </p>
                   {trackingMap[o._id].map((t) => (
                     <div key={t.status} style={{ fontSize: "0.84rem", color: t.completed ? "#2e7d32" : "var(--text-light)", marginBottom: 3 }}>
@@ -172,55 +188,53 @@ function MyOrders() {
                     <span style={{ color: "var(--taupe)" }}>× {p.quantity}</span>
                   </span>
                   <span style={{ color: "var(--rose)" }}>
-                    ${(p.price * p.quantity).toFixed(2)}
+                    {formatPKR(p.price * p.quantity)}
                   </span>
                 </div>
               ))}
               {o.status === "Delivered" && !o.reviewRating && (
                 <div style={{ marginTop: 12 }}>
-                  <p style={{ fontSize: "0.8rem", color: "var(--text-light)", marginBottom: 4 }}>
-                    Share a quick review of this order:
+                  <p style={{ fontSize: "0.8rem", color: "var(--text-light)", marginBottom: 8 }}>
+                    Rate each product (saved automatically to the shop):
                   </p>
-                  <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-                    <select
-                      value={(reviewDrafts[o._id]?.rating) || 5}
-                      onChange={(e) => updateDraft(o._id, { rating: Number(e.target.value) })}
-                      style={{ fontSize: "0.8rem" }}
-                    >
-                      <option value={5}>★★★★★</option>
-                      <option value={4}>★★★★☆</option>
-                      <option value={3}>★★★☆☆</option>
-                      <option value={2}>★★☆☆☆</option>
-                      <option value={1}>★☆☆☆☆</option>
-                    </select>
-                    <input
-                      style={{ flex: 1, fontSize: "0.8rem", padding: "6px 8px" }}
-                      placeholder="A few words about your experience…"
-                      value={reviewDrafts[o._id]?.comment || ""}
-                      onChange={(e) => updateDraft(o._id, { comment: e.target.value })}
-                    />
-                    <button
-                      className="btn-ghost"
-                      style={{ fontSize: "0.75rem", padding: "6px 10px" }}
-                      onClick={() => submitReview(o._id)}
-                    >
-                      Submit
-                    </button>
-                  </div>
+                  {(o.products || []).filter((p) => p.productId).map((p) => (
+                    <div key={p.productId} className="product-review-row">
+                      <span className="product-review-name">{p.name}</span>
+                      <select
+                        value={(productReviewDrafts[o._id]?.[p.productId]?.rating) || 5}
+                        onChange={(e) =>
+                          updateProductDraft(o._id, p.productId, { rating: Number(e.target.value) })
+                        }
+                      >
+                        <option value={5}>★★★★★</option>
+                        <option value={4}>★★★★☆</option>
+                        <option value={3}>★★★☆☆</option>
+                        <option value={2}>★★☆☆☆</option>
+                        <option value={1}>★☆☆☆☆</option>
+                      </select>
+                      <input
+                        placeholder="Optional comment…"
+                        value={productReviewDrafts[o._id]?.[p.productId]?.comment || ""}
+                        onChange={(e) =>
+                          updateProductDraft(o._id, p.productId, { comment: e.target.value })
+                        }
+                      />
+                    </div>
+                  ))}
+                  <button
+                    className="btn-primary"
+                    style={{ marginTop: 10, padding: "10px 18px" }}
+                    onClick={() => submitReview(o)}
+                  >
+                    Submit ratings
+                  </button>
                 </div>
               )}
               {o.reviewRating && (
                 <div style={{ marginTop: 10 }}>
-                  <p style={{ fontSize: "0.8rem", color: "var(--text-light)", marginBottom: 4 }}>
-                    <strong>Your review:</strong>{" "}
-                    {"★".repeat(o.reviewRating)}{" "}
-                    {"☆".repeat(5 - o.reviewRating)}
+                  <p style={{ fontSize: "0.8rem", color: "var(--text-light)" }}>
+                    <strong>Your ratings were submitted.</strong> Thank you for your feedback!
                   </p>
-                  {o.reviewComment && (
-                    <p style={{ fontSize: "0.85rem", color: "var(--text)" }}>
-                      “{o.reviewComment}”
-                    </p>
-                  )}
                 </div>
               )}
             </div>
@@ -232,4 +246,3 @@ function MyOrders() {
 }
 
 export default MyOrders;
-

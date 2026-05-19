@@ -4,6 +4,9 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const ProductEvent = require("../models/ProductEvent");
 const User = require("../models/User");
+const ProductReview = require("../models/ProductReview");
+const { upsertProductReview } = require("../utils/productRating");
+const { sendOrderConfirmationEmail } = require("../utils/mailer");
 
 const router = express.Router();
 
@@ -69,8 +72,10 @@ router.post("/", async (req, res) => {
     } = req.body;
     if (!buyerName || !buyerEmail || !buyerPhone || !buyerCity || !buyerAddress || !products?.length || !paymentMethod)
       return res.status(400).json({ message: "Missing order details" });
-    if (paymentMethod === "CARD" && !paymentIntentId) {
-      return res.status(400).json({ message: "Missing payment id for card order" });
+    if (paymentMethod === "CARD") {
+      return res.status(400).json({
+        message: "Sorry, we only accept cash on delivery at the moment. Please choose Cash on Delivery.",
+      });
     }
 
     const order = new Order({
@@ -83,9 +88,14 @@ router.post("/", async (req, res) => {
       totalPrice,
       paymentMethod,
       paymentIntentId: paymentIntentId || undefined,
-      paymentStatus: paymentMethod === "CARD" ? "Paid" : "Pending",
+      paymentStatus: "Pending",
     });
     await order.save();
+
+    sendOrderConfirmationEmail(order).catch((err) => {
+      console.error("Order confirmation email failed:", err.message);
+    });
+
     res.json(order);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
@@ -120,8 +130,19 @@ router.get("/:id/tracking", async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    const statuses = ["Pending", "Packed", "Dispatched", "Delivered"];
-    const currentIndex = Math.max(statuses.indexOf(order.status), 0);
+    const statuses = [
+      "Order confirmed",
+      "Packed (3–5 days)",
+      "Dispatched (~1 week)",
+      "Delivered (2–3 weeks)",
+    ];
+    const statusMap = {
+      Pending: 0,
+      Packed: 1,
+      Dispatched: 2,
+      Delivered: 3,
+    };
+    const currentIndex = statusMap[order.status] ?? 0;
     const timeline = statuses.map((status, idx) => ({
       status,
       completed: idx <= currentIndex,
@@ -406,25 +427,70 @@ router.put("/:id/status", async (req, res) => {
   }
 });
 
-// Add or update a review for an order (Buyer)
+// Add or update product reviews from a delivered order (Buyer)
 router.put("/:id/review", async (req, res) => {
   try {
-    const { reviewRating, reviewComment } = req.body;
-    if (!reviewRating) {
-      return res.status(400).json({ message: "Rating is required" });
+    const { buyerEmail, productReviews } = req.body;
+    const legacyRating = req.body.reviewRating;
+    const legacyComment = req.body.reviewComment || "";
+
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (order.status !== "Delivered") {
+      return res.status(400).json({ message: "You can review products after delivery." });
     }
 
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
+    let reviews = Array.isArray(productReviews) ? productReviews : [];
+
+    if (!reviews.length && legacyRating) {
+      reviews = (order.products || [])
+        .filter((p) => p.productId)
+        .map((p) => ({
+          productId: p.productId,
+          rating: Number(legacyRating),
+          comment: legacyComment,
+        }));
+    }
+
+    if (!reviews.length) {
+      return res.status(400).json({ message: "Please rate at least one product." });
+    }
+
+    const email = (buyerEmail || order.buyerEmail || "").toLowerCase().trim();
+    if (!email) return res.status(400).json({ message: "Buyer email is required." });
+
+    for (const item of reviews) {
+      if (!item.productId || !item.rating) continue;
+      await upsertProductReview({
+        productId: item.productId,
+        userEmail: email,
+        orderId: order._id,
+        rating: Number(item.rating),
+        comment: item.comment || "",
+      });
+    }
+
+    const avgOrderRating =
+      reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) / reviews.length;
+
+    const updated = await Order.findByIdAndUpdate(
+      order._id,
       {
-        reviewRating,
-        reviewComment: reviewComment || "",
+        reviewRating: Math.round(avgOrderRating),
+        reviewComment: reviews.map((r) => r.comment).filter(Boolean).join(" ") || legacyComment,
         reviewedAt: new Date(),
       },
       { new: true }
     );
-    if (!order) return res.status(404).json({ message: "Order not found" });
-    res.json(order);
+
+    const productRatings = await Promise.all(
+      reviews.map(async (r) => {
+        const count = await ProductReview.countDocuments({ productId: r.productId });
+        return { productId: r.productId, reviewCount: count };
+      })
+    );
+
+    res.json({ order: updated, productRatings });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }

@@ -4,6 +4,7 @@ import { apiPath } from "../config/api";
 import { Link } from "react-router-dom";
 import SeoHead from "../components/SeoHead";
 import ProductImage from "../components/ProductImage";
+import { formatPKR } from "../utils/currency";
 
 function Wishlist() {
   const [items, setItems] = useState([]);
@@ -59,7 +60,7 @@ function Wishlist() {
                   <p>{p?.description}</p>
                 </div>
                 <div className="product-card-footer">
-                  <span className="product-price">${p?.price}</span>
+                  <span className="product-price">{formatPKR(p?.price)}</span>
                   <div style={{ display: "flex", gap: 8 }}>
                     <Link to={`/products/${p?._id}`}><button className="btn-ghost">View</button></Link>
                     <button className="btn-danger" onClick={() => remove(p?._id)}>Remove</button>

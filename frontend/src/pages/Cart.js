@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { apiPath } from "../config/api";
 import ProductImage from "../components/ProductImage";
+import { formatPKR } from "../utils/currency";
 
 function Cart() {
   const [cart, setCart] = useState([]);
@@ -79,29 +80,13 @@ function Cart() {
     setLoading(true);
     setCardError("");
 
-    let paymentIntentId;
     try {
       if (paymentMethod === "CARD") {
-        if (!cardNumber) {
-          setCardError("Enter a card number (sandbox).");
-          setLoading(false);
-          return;
-        }
-
-        // Fake sandbox payment (no Stripe required)
-        const payRes = await axios.post(apiPath("/api/orders/fake-charge"), {
-          cardNumber,
-          cardExpiry,
-          cardCvc,
-          totalPrice,
-        });
-        if (payRes.data.status !== "succeeded") {
-          setCardError("Payment failed (sandbox).");
-          setLoading(false);
-          return;
-        }
-        paymentIntentId = payRes.data.paymentId;
-
+        setCardError(
+          "Sorry, we only accept cash on delivery. Please select Cash on Delivery to place your order."
+        );
+        setLoading(false);
+        return;
       }
 
       await axios.post(apiPath("/api/orders"), {
@@ -117,8 +102,7 @@ function Cart() {
           quantity: p.quantity,
         })),
         totalPrice: finalTotal,
-        paymentMethod,
-        paymentIntentId: paymentMethod === "CARD" ? paymentIntentId : undefined,
+        paymentMethod: "CASH",
       });
 
       localStorage.removeItem("cart");
@@ -128,7 +112,10 @@ function Cart() {
       setCardExpiry("");
       setCardCvc("");
       setCouponCode("");
-      navigate("/shop");
+      alert(
+        "Order placed! A confirmation email with your items and 2–3 week delivery timeline has been sent to your inbox."
+      );
+      navigate("/my-orders");
     } catch (err) {
       console.error(err);
       const msg = err.response?.data?.message || "Failed to place order. Please try again.";
@@ -174,7 +161,7 @@ function Cart() {
               />
               <div className="cart-item-info">
                 <h3>{p.name}</h3>
-                <p>${p.price} each</p>
+                <p>{formatPKR(p.price)} each</p>
                 <div className="qty-control">
                   <button onClick={() => updateQuantity(p._id, p.quantity - 1)}>−</button>
                   <span>{p.quantity}</span>
@@ -183,7 +170,7 @@ function Cart() {
               </div>
               <div className="cart-item-actions">
                 <div className="cart-item-price">
-                  ${(p.price * p.quantity).toFixed(2)}
+                  {formatPKR(p.price * p.quantity)}
                 </div>
                 <button className="btn-danger" onClick={() => removeItem(p._id)}>Remove</button>
               </div>
@@ -197,12 +184,12 @@ function Cart() {
           {cart.map((p) => (
             <div className="cart-summary-row" key={p._id}>
               <span>{p.name} × {p.quantity}</span>
-              <span>${(p.price * p.quantity).toFixed(2)}</span>
+              <span>{formatPKR(p.price * p.quantity)}</span>
             </div>
           ))}
           <div className="cart-summary-total">
             <span>Total</span>
-            <span>${finalTotal.toFixed(2)}</span>
+            <span>{formatPKR(finalTotal)}</span>
           </div>
           <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--blush)" }}>
             <div style={{ fontSize: "0.78rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-light)", marginBottom: 8 }}>
@@ -220,7 +207,7 @@ function Cart() {
             </div>
             {discount > 0 && (
               <p style={{ marginTop: 8, fontSize: "0.85rem", color: "var(--sage)" }}>
-                Discount: -${discount.toFixed(2)}
+                Discount: -{formatPKR(discount)}
               </p>
             )}
             {couponMsg && (
@@ -237,7 +224,7 @@ function Cart() {
             <div style={{ fontSize: "0.9rem", color: "var(--text-light)", lineHeight: 1.7 }}>
               <div><strong>Shipping:</strong> Dispatch 1–2 days. Delivery 3–7 working days.</div>
               <div><strong>Returns:</strong> Within 7 days for unused items (proof of purchase required).</div>
-              <div><strong>Payments:</strong> Cash on Delivery or Card (Sandbox: 4242 4242 4242 4242).</div>
+              <div><strong>Payments:</strong> Cash on delivery only (PKR).</div>
             </div>
           </div>
 

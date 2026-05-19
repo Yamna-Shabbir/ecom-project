@@ -8,6 +8,8 @@ const Order = require("../models/Order");
 const ProductEvent = require("../models/ProductEvent");
 const { generateProductSeo } = require("../services/productSeoAi");
 const { saveProductImage } = require("../utils/productImages");
+const ProductReview = require("../models/ProductReview");
+const { upsertProductReview } = require("../utils/productRating");
 
 const router = express.Router();
 
@@ -84,7 +86,6 @@ router.post("/", async (req, res) => {
       image,
       category,
       brand,
-      rating,
       seoTitle,
       seoDescription,
       seoKeywords,
@@ -104,8 +105,7 @@ router.post("/", async (req, res) => {
       description,
       image,
       category,
-      brand,
-      rating,
+      brand: brand || "Gulkaar",
       seoTitle,
       seoDescription,
       seoKeywords,
@@ -320,6 +320,46 @@ router.get("/recommendations", async (req, res) => {
   }
 });
 
+router.post("/:id/reviews", async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid product id" });
+    }
+    const { rating, comment, userEmail, orderId } = req.body;
+    if (!userEmail || !rating) {
+      return res.status(400).json({ message: "Email and rating are required." });
+    }
+
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    const review = await upsertProductReview({
+      productId: product._id,
+      userEmail,
+      orderId: orderId || undefined,
+      rating: Number(rating),
+      comment: comment || "",
+    });
+
+    const updated = await Product.findById(product._id);
+    res.json({ review, product: updated });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+router.get("/:id/reviews", async (req, res) => {
+  try {
+    const reviews = await ProductReview.find({ productId: req.params.id })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .lean();
+    res.json(reviews);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -334,6 +374,8 @@ router.get("/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const update = { ...req.body };
+    delete update.rating;
+    delete update.reviewCount;
     if ("slug" in update) {
       update.slug = update.slug && String(update.slug).trim() ? String(update.slug).trim() : undefined;
     }

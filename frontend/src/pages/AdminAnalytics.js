@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "../config/api";
+import { formatPKR } from "../utils/currency";
 import { Link } from "react-router-dom";
 import {
   Area,
@@ -22,7 +23,7 @@ import SeoHead from "../components/SeoHead";
 const CHART_COLORS = ["#8B5E4B", "#C9A88A", "#E8C4B8", "#6B4423", "#D4A574", "#A67B5B", "#F0D9CE", "#4b2e20"];
 
 function formatMoney(n) {
-  return `$${Number(n || 0).toFixed(2)}`;
+  return formatPKR(n);
 }
 
 function formatShortDate(iso) {
@@ -188,7 +189,7 @@ function AdminAnalytics() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(139, 94, 75, 0.15)" />
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#8B7355" }} />
-                  <YAxis tick={{ fontSize: 11, fill: "#8B7355" }} tickFormatter={(v) => `$${v}`} />
+                  <YAxis tick={{ fontSize: 11, fill: "#8B7355" }} tickFormatter={(v) => `Rs.${v}`} />
                   <Tooltip
                     contentStyle={{
                       borderRadius: 8,
@@ -290,7 +291,7 @@ function AdminAnalytics() {
                 <BarChart data={categoryData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(139, 94, 75, 0.12)" />
                   <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#8B7355" }} />
-                  <YAxis tick={{ fontSize: 11, fill: "#8B7355" }} tickFormatter={(v) => `$${v}`} />
+                  <YAxis tick={{ fontSize: 11, fill: "#8B7355" }} tickFormatter={(v) => `Rs.${v}`} />
                   <Tooltip
                     labelFormatter={(_, p) => p?.[0]?.payload?.fullName || ""}
                     formatter={(v) => [formatMoney(v), "Revenue"]}
@@ -324,7 +325,7 @@ function AdminAnalytics() {
                   <BarChart data={monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(139, 94, 75, 0.12)" />
                     <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#8B7355" }} />
-                    <YAxis tick={{ fontSize: 11, fill: "#8B7355" }} tickFormatter={(v) => `$${v}`} />
+                    <YAxis tick={{ fontSize: 11, fill: "#8B7355" }} tickFormatter={(v) => `Rs.${v}`} />
                     <Tooltip
                       formatter={(v, name) =>
                         name === "revenue" ? [formatMoney(v), "Revenue"] : [v, "Orders"]

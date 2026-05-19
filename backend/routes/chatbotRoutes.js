@@ -148,7 +148,7 @@ router.post("/query", async (req, res) => {
       // Payment methods
       if (normalized.includes("payment")) {
         return res.json({
-          reply: "Payments: Cash on Delivery or Card (Sandbox demo). For card, use test number 4242 4242 4242 4242.",
+          reply: "Payments: Cash on Delivery only (PKR). Card payment is not available online.",
           products: [],
         });
       }
@@ -161,7 +161,7 @@ router.post("/query", async (req, res) => {
         
         if (!productQuery) {
           return res.json({
-            reply: 'Add a keyword (e.g. "handmade") or a price (e.g. "under 1000") so I can narrow results.',
+            reply: 'Add a keyword (e.g. "flowers") or a price in PKR (e.g. "under 2000") so I can narrow results.',
             products: [],
           });
         }

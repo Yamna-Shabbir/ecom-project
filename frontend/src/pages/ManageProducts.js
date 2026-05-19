@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { apiPath, resolveImageUrl } from "../config/api";
 import SeoHead from "../components/SeoHead";
-
-const CATEGORY_OPTIONS = ["Flowers", "Laptop Accessories", "Hair Accessories", "Scarfs"];
+import { PRODUCT_CATEGORIES } from "../constants/categories";
+import { formatPKR } from "../utils/currency";
 
 function ManageProducts() {
   const [products, setProducts] = useState([]);
@@ -13,8 +13,6 @@ function ManageProducts() {
     description: "",
     image: "",
     category: "",
-    brand: "",
-    rating: 4.5,
     seoTitle: "",
     seoDescription: "",
     seoKeywords: "",
@@ -81,8 +79,6 @@ function ManageProducts() {
         description: "",
         image: "",
         category: "",
-        brand: "",
-        rating: 4.5,
         seoTitle: "",
         seoDescription: "",
         seoKeywords: "",
@@ -134,8 +130,6 @@ function ManageProducts() {
         price: form.price,
         description: form.description,
         category: form.category,
-        brand: form.brand,
-        rating: form.rating,
       };
       const url = editId
         ? apiPath(`/api/products/${editId}/generate-seo`)
@@ -156,8 +150,6 @@ function ManageProducts() {
       description: product.description || "",
       image: product.image || "",
       category: product.category || "",
-      brand: product.brand || "",
-      rating: product.rating || 4.5,
       seoTitle: product.seoTitle || "",
       seoDescription: product.seoDescription || "",
       seoKeywords: (product.seoKeywords || []).join(", "),
@@ -229,7 +221,7 @@ function ManageProducts() {
             />
           </div>
           <div className="form-group">
-            <label>Price (USD)</label>
+            <label>Price (PKR)</label>
             <input
               type="number"
               min="0"
@@ -252,22 +244,15 @@ function ManageProducts() {
             <label>Category</label>
             <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
               <option value="">Select category</option>
-              {CATEGORY_OPTIONS.map((c) => (
+              {PRODUCT_CATEGORIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
           </div>
-          <div className="form-group">
-            <label>Brand</label>
-            <input value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
-          </div>
         </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Rating</label>
-            <input type="number" min="0" max="5" step="0.1" value={form.rating} onChange={(e) => setForm({ ...form, rating: e.target.value })} />
-          </div>
-        </div>
+        <p className="form-hint" style={{ marginTop: -8, marginBottom: 16 }}>
+          Product ratings are calculated automatically from customer reviews after delivery.
+        </p>
 
         <div className="seo-section-header">
           <h3>SEO</h3>
@@ -420,7 +405,7 @@ function ManageProducts() {
                     )}
                   </td>
                   <td style={{ fontWeight: 500 }}>{p.name}</td>
-                  <td style={{ color: "var(--rose)", fontFamily: "Cormorant Garamond, serif", fontSize: "1.1rem" }}>${p.price}</td>
+                  <td style={{ color: "var(--rose)", fontFamily: "Cormorant Garamond, serif", fontSize: "1.1rem" }}>{formatPKR(p.price)}</td>
                   <td style={{ color: "var(--text-light)", maxWidth: 220 }}>{p.description || "—"}</td>
                   <td>
                     <div style={{ display: "flex", gap: 8 }}>

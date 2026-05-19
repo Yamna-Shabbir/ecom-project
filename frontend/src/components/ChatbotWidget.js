@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { apiPath, resolveImageUrl } from "../config/api";
+import { formatPKR } from "../utils/currency";
 import { useNavigate } from "react-router-dom";
 
 
@@ -328,7 +329,7 @@ function ChatbotWidget() {
                         )}
                         <div className="chatbot-product-chip-info">
                           <div className="chatbot-product-chip-name">{p.name}</div>
-                          <div className="chatbot-product-chip-price">${p.price}</div>
+                          <div className="chatbot-product-chip-price">{formatPKR(p.price)}</div>
                         </div>
                       </button>
                     ))}

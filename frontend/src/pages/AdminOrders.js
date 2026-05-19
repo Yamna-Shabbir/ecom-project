@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { apiPath } from "../config/api";
+import { formatPKR } from "../utils/currency";
 
 function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -108,7 +109,7 @@ function AdminOrders() {
                   </select>
                 </div>
                 <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.5rem", color: "var(--rose)", marginTop: 4 }}>
-                  ${o.totalPrice?.toFixed(2)}
+                  {formatPKR(o.totalPrice)}
                 </div>
               </div>
             </div>
@@ -140,7 +141,7 @@ function AdminOrders() {
               {o.products.map((p, i) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.88rem", color: "var(--text)", marginBottom: 6 }}>
                   <span>{p.name} <span style={{ color: "var(--taupe)" }}>× {p.quantity}</span></span>
-                  <span style={{ color: "var(--rose)" }}>${(p.price * p.quantity).toFixed(2)}</span>
+                  <span style={{ color: "var(--rose)" }}>{formatPKR(p.price * p.quantity)}</span>
                 </div>
               ))}
             </div>

@@ -4,8 +4,8 @@ import { apiPath } from "../config/api";
 import { Link } from "react-router-dom";
 import SeoHead from "../components/SeoHead";
 import ProductImage from "../components/ProductImage";
-
-const CATEGORY_OPTIONS = ["Flowers", "Laptop Accessories", "Hair Accessories", "Scarfs"];
+import { PRODUCT_CATEGORIES } from "../constants/categories";
+import { formatPKR } from "../utils/currency";
 
 function Toast({ msg, onClose }) {
   useEffect(() => {
@@ -22,25 +22,34 @@ function Shop() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [category, setCategory] = useState("");
-  const [brand, setBrand] = useState("");
-  const [debouncedBrand, setDebouncedBrand] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [debouncedMin, setDebouncedMin] = useState("");
+  const [debouncedMax, setDebouncedMax] = useState("");
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedBrand(brand.trim()), 380);
+    const t = setTimeout(() => {
+      setDebouncedMin(minPrice.trim());
+      setDebouncedMax(maxPrice.trim());
+    }, 380);
     return () => clearTimeout(t);
-  }, [brand]);
+  }, [minPrice, maxPrice]);
 
   useEffect(() => {
     setLoading(true);
     setError("");
     axios
       .get(apiPath("/api/products"), {
-        params: { category: category || undefined, brand: debouncedBrand || undefined },
+        params: {
+          category: category || undefined,
+          minPrice: debouncedMin || undefined,
+          maxPrice: debouncedMax || undefined,
+        },
       })
       .then((res) => setProducts(res.data))
       .catch(() => setError("Unable to load products right now."))
       .finally(() => setLoading(false));
-  }, [category, debouncedBrand]);
+  }, [category, debouncedMin, debouncedMax]);
 
   useEffect(() => {
     axios
@@ -94,8 +103,8 @@ function Shop() {
     <div className="page">
       <SeoHead
         title="Shop Products | Gulkaar"
-        description="Browse handcrafted products by category and brand."
-        keywords="shop,products,handmade,category,brand"
+        description="Browse handcrafted crochet by category and price in PKR."
+        keywords="shop,handmade,crochet,pakistan,PKR"
       />
       <div className="page-header">
         <h1>The Collection</h1>
@@ -117,7 +126,7 @@ function Shop() {
               onChange={(e) => setCategory(e.target.value)}
             >
               <option value="">All categories</option>
-              {CATEGORY_OPTIONS.map((c) => (
+              {PRODUCT_CATEGORIES.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -125,17 +134,33 @@ function Shop() {
             </select>
           </div>
           <div className="shop-filter-field">
-            <label htmlFor="shop-brand" className="shop-filter-label">
-              Brand
+            <label htmlFor="shop-min-price" className="shop-filter-label">
+              Min price (PKR)
             </label>
             <input
-              id="shop-brand"
+              id="shop-min-price"
               className="shop-filter-input"
-              type="text"
-              placeholder="Filter by brand name"
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              autoComplete="off"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="e.g. 10"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+            />
+          </div>
+          <div className="shop-filter-field">
+            <label htmlFor="shop-max-price" className="shop-filter-label">
+              Max price (PKR)
+            </label>
+            <input
+              id="shop-max-price"
+              className="shop-filter-input"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="e.g. 100"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
             />
           </div>
         </div>
@@ -155,7 +180,7 @@ function Shop() {
                   {p.description ? <p className="product-card-desc">{p.description}</p> : null}
                 </div>
                 <div className="product-card-price-row">
-                  <span className="product-price product-price--lg">${p.price}</span>
+                  <span className="product-price product-price--lg">{formatPKR(p.price)}</span>
                 </div>
                 <div className="product-card-actions">
                   <Link to={`/products/${p._id}`}>
@@ -201,7 +226,7 @@ function Shop() {
                 {p.description ? <p className="product-card-desc">{p.description}</p> : null}
               </div>
               <div className="product-card-price-row">
-                <span className="product-price product-price--lg">${p.price}</span>
+                <span className="product-price product-price--lg">{formatPKR(p.price)}</span>
               </div>
               <div className="product-card-actions">
                 <Link to={`/products/${p._id}`}>

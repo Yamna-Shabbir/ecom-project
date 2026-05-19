@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { apiPath } from "../config/api";
+import { formatPKR } from "../utils/currency";
 import SeoHead from "../components/SeoHead";
 
 function Dashboard() {
@@ -35,7 +36,7 @@ function Dashboard() {
             <div className="metric-card">
               <p className="metric-label">Total Revenue</p>
               <p className="metric-value">
-                ${stats.totalRevenue.toFixed(2)}
+                {formatPKR(stats.totalRevenue)}
               </p>
             </div>
             <div className="metric-card">

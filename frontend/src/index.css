@@ -458,13 +458,17 @@ a {
 }
 
 .hero-logo-img {
-  width: 260px;
-  height: 260px;
-  object-fit: cover;
+  width: 280px;
+  height: 280px;
+  max-width: min(280px, 70vw);
+  object-fit: contain;
+  object-position: center;
   border-radius: 50%;
-  box-shadow: 0 12px 40px rgba(90, 50, 30, 0.1);
+  background: radial-gradient(circle at 50% 45%, rgba(255, 249, 243, 0.95) 0%, rgba(232, 196, 184, 0.25) 100%);
+  padding: 14px;
+  box-shadow: 0 12px 40px rgba(90, 50, 30, 0.12);
   border: 4px solid var(--warm-white);
-  outline: 1px solid var(--blush);
+  outline: 2px solid rgba(201, 134, 122, 0.35);
 }
 
 /* Navbar logo */
@@ -475,11 +479,16 @@ a {
 }
 
 .navbar-logo-img {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  object-fit: cover;
-  border: 1.5px solid var(--blush);
+  object-fit: contain;
+  object-position: center;
+  background: var(--warm-white);
+  padding: 3px;
+  border: 2px solid var(--blush);
+  box-shadow: 0 2px 10px rgba(160, 93, 82, 0.1);
+  flex-shrink: 0;
 }
 
 /* Auth logo */
@@ -491,13 +500,16 @@ a {
 }
 
 .auth-logo-img {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  background: var(--warm-white);
+  padding: 6px;
   border: 2px solid var(--blush);
   margin-bottom: 10px;
-  box-shadow: 0 4px 20px rgba(90, 50, 30, 0.1);
+  box-shadow: 0 6px 24px rgba(90, 50, 30, 0.1);
 }
 
 /* Override auth-logo to not be a block on its own when inside wrap */
@@ -568,7 +580,7 @@ a {
 .shop-filter-strip {
   margin-top: 22px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 18px 24px;
   max-width: 720px;
   padding: 18px 20px;
@@ -637,6 +649,40 @@ a {
   .shop-filter-strip {
     grid-template-columns: 1fr;
     padding: 16px;
+  }
+}
+
+.product-review-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: rgba(255, 249, 243, 0.8);
+  border: 1px solid var(--blush);
+  border-radius: 8px;
+}
+
+.product-review-name {
+  grid-column: 1 / -1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--brown);
+}
+
+.product-review-row select,
+.product-review-row input {
+  font-size: 0.8rem;
+  padding: 8px 10px;
+  border: 1px solid var(--blush);
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+@media (max-width: 768px) {
+  .shop-filter-strip {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1243,6 +1289,31 @@ a {
   line-height: 1.6;
 }
 
+.product-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.product-detail-actions .btn-primary,
+.product-detail-actions .btn-outline {
+  min-height: 44px;
+  padding: 12px 28px;
+}
+
+@media (max-width: 768px) {
+  .product-detail-actions {
+    flex-direction: column;
+  }
+
+  .product-detail-actions .btn-primary,
+  .product-detail-actions .btn-outline {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 .data-table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -1655,8 +1726,9 @@ a {
   }
 
   .navbar-logo-img {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
+    padding: 2px;
   }
 
   .page {
