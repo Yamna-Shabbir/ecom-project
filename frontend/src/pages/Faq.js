@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "../config/api";
 import SeoHead from "../components/SeoHead";
+import { SUPPORT_EMAIL } from "../constants/contact";
 
 function Faq() {
   const [top, setTop] = useState([]);
@@ -76,11 +77,21 @@ function Faq() {
         )}
       </section>
 
+      <section className="faq-section faq-contact-section">
+        <h2 className="faq-section-title">Contact us</h2>
+        <p className="faq-section-sub">
+          For orders, delivery, or anything else — email us directly or use the question box below.
+        </p>
+        <p className="faq-contact-email">
+          <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+        </p>
+      </section>
+
       <section className="faq-section faq-ask-section">
         <h2 className="faq-section-title">Ask the team</h2>
         <p className="faq-section-sub">
-          Can’t find what you need? Send a question — we read every message. If others ask the same thing, it
-          counts toward the “most asked” list above once we publish an answer.
+          Prefer a message here? Write your question below — we read every one. Popular answers may appear in
+          “Most asked” above once we reply.
         </p>
         <form className="faq-ask-form" onSubmit={submitQuestion}>
           <label htmlFor="faq-question" className="faq-sr-only">

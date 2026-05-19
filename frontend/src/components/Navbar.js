@@ -20,7 +20,9 @@ function Navbar() {
     <nav className={`navbar${menuOpen ? " navbar--open" : ""}`}>
       <div className="navbar-top">
         <Link to="/" className="navbar-logo" onClick={closeMenu}>
-          <img src={logo} alt="Gülkaar" className="navbar-logo-img" />
+          <span className="brand-logo-frame brand-logo-frame--sm">
+            <img src={logo} alt="" />
+          </span>
           Gül<span>kaar</span>
         </Link>
 

@@ -54,7 +54,9 @@ function Login() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo-wrap">
-          <img src={logo} alt="Gülkaar logo" className="auth-logo-img" />
+          <span className="brand-logo-frame brand-logo-frame--md">
+            <img src={logo} alt="Gülkaar" />
+          </span>
           <span className="auth-logo">Gülkaar</span>
         </div>
         <h2>Welcome back</h2>

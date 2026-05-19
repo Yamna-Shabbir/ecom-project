@@ -3,6 +3,7 @@ import axios from "axios";
 import { apiPath } from "../config/api";
 import SeoHead from "../components/SeoHead";
 import { formatPKR } from "../utils/currency";
+import { SUPPORT_EMAIL } from "../constants/contact";
 
 function MyOrders() {
   const [orders, setOrders] = useState([]);
@@ -85,7 +86,11 @@ function MyOrders() {
       <SeoHead title="My Orders | Gulkaar" description="Track your order status and history." keywords="orders,tracking,history" />
       <div className="page-header">
         <h1>My Orders</h1>
-        <p>Track your past purchases and their status.</p>
+        <p>
+          Track your orders below (delivery usually takes 2–3 weeks). Questions? Email{" "}
+          <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> or use{" "}
+          <a href="/faq">FAQ &amp; ask the team</a>.
+        </p>
       </div>
       {error && <div className="error-msg">{error}</div>}
 

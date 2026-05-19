@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import Cart from "./pages/Cart";
 import MyOrders from "./pages/MyOrders";
+import OrderSuccess from "./pages/OrderSuccess";
 import ManageProducts from "./pages/ManageProducts";
 import AdminOrders from "./pages/AdminOrders";
 import Dashboard from "./pages/Dashboard";
@@ -48,6 +49,7 @@ function App() {
           <Route path="/shop" element={<BuyerRoute><Shop /></BuyerRoute>} />
           <Route path="/cart" element={<BuyerRoute><Cart /></BuyerRoute>} />
           <Route path="/my-orders" element={<BuyerRoute><MyOrders /></BuyerRoute>} />
+          <Route path="/order-success" element={<BuyerRoute><OrderSuccess /></BuyerRoute>} />
           <Route path="/wishlist" element={<BuyerRoute><Wishlist /></BuyerRoute>} />
           <Route path="/faq" element={<BuyerRoute><Faq /></BuyerRoute>} />
           <Route path="/products/:id" element={<BuyerRoute><ProductDetails /></BuyerRoute>} />

@@ -34,7 +34,9 @@ function Home() {
           </div>
         </div>
         <div className="hero-logo-wrap">
-          <img src={logo} alt="Gülkaar" className="hero-logo-img" />
+          <span className="brand-logo-frame brand-logo-frame--lg">
+            <img src={logo} alt="Gülkaar" />
+          </span>
         </div>
       </div>
 

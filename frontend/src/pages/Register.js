@@ -59,7 +59,9 @@ function Register() {
 
         {/* Logo */}
         <div className="auth-logo-wrap">
-          <img src={logo} alt="Logo" className="auth-logo-img" />
+          <span className="brand-logo-frame brand-logo-frame--md">
+            <img src={logo} alt="Gülkaar" />
+          </span>
           <span className="auth-logo">Gülkaar</span>
         </div>
 

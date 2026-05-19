@@ -89,7 +89,7 @@ function Cart() {
         return;
       }
 
-      await axios.post(apiPath("/api/orders"), {
+      const res = await axios.post(apiPath("/api/orders"), {
         buyerName: name,
         buyerEmail: email,
         buyerPhone: phone,
@@ -112,10 +112,7 @@ function Cart() {
       setCardExpiry("");
       setCardCvc("");
       setCouponCode("");
-      alert(
-        "Order placed! A confirmation email with your items and 2–3 week delivery timeline has been sent to your inbox."
-      );
-      navigate("/my-orders");
+      navigate("/order-success", { state: { order: res.data }, replace: true });
     } catch (err) {
       console.error(err);
       const msg = err.response?.data?.message || "Failed to place order. Please try again.";

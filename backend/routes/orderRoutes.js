@@ -6,8 +6,6 @@ const ProductEvent = require("../models/ProductEvent");
 const User = require("../models/User");
 const ProductReview = require("../models/ProductReview");
 const { upsertProductReview } = require("../utils/productRating");
-const { sendOrderConfirmationEmail } = require("../utils/mailer");
-
 const router = express.Router();
 
 function normalizeCardNumber(cardNumber) {
@@ -91,11 +89,6 @@ router.post("/", async (req, res) => {
       paymentStatus: "Pending",
     });
     await order.save();
-
-    sendOrderConfirmationEmail(order).catch((err) => {
-      console.error("Order confirmation email failed:", err.message);
-    });
-
     res.json(order);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
