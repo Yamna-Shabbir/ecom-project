@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { apiPath } from "../config/api";
-import { api, wakeApi, networkErrorMessage } from "../utils/apiClient";
+import { apiPost, wakeApi, networkErrorMessage } from "../utils/apiClient";
 import { useNavigate, Link } from "react-router-dom";
 import { validateEmail } from "../utils/validateEmail";
 import logo from "../logo.jpeg";
@@ -37,7 +36,7 @@ function Register() {
 
     try {
       await wakeApi();
-      const res = await api.post(apiPath("/api/auth/register"), {
+      const res = await apiPost("/api/auth/register", {
         name: name.trim(),
         email: emailCheck.email,
         password,

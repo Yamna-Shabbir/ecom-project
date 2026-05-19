@@ -29,6 +29,10 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || clientOrigins.includes(origin)) return callback(null, true);
+      // Netlify site rename changes *.netlify.app — allow any Netlify deploy URL
+      if (/^https:\/\/[a-z0-9-]+\.netlify\.app$/i.test(origin)) {
+        return callback(null, true);
+      }
       return callback(null, false);
     },
     credentials: true,
