@@ -134,6 +134,9 @@ function Register() {
         <p className="auth-switch">
           Already have an account? <Link to="/login">Sign in</Link>
         </p>
+        <p className="auth-switch auth-switch--muted">
+          <Link to="/discover">Browse handmade guides</Link>
+        </p>
 
       </div>
     </div>

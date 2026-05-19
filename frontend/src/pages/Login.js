@@ -88,6 +88,9 @@ function Login() {
         <p className="auth-switch">
           New to Gülkaar? <Link to="/register">Create an account</Link>
         </p>
+        <p className="auth-switch auth-switch--muted">
+          <Link to="/discover">Browse handmade guides</Link>
+        </p>
       </div>
     </div>
   );

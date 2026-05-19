@@ -8,3 +8,4 @@
   CI = "false"
   GENERATE_SOURCEMAP = "false"
   REACT_APP_API_URL = "https://ecom-project-tjkq.onrender.com"
+  REACT_APP_SITE_URL = "https://gulkaar.netlify.app"

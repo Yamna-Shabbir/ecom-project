@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import Navbar from "./components/Navbar";
@@ -18,6 +18,9 @@ import AdminUsers from "./pages/AdminUsers";
 import Faq from "./pages/Faq";
 import AdminFaq from "./pages/AdminFaq";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import DiscoverIndex from "./pages/DiscoverIndex";
+import DiscoverArticle from "./pages/DiscoverArticle";
+import AdminParasiteSeo from "./pages/AdminParasiteSeo";
 import BuyerRoute from "./components/BuyerRoute";
 import AdminRoute from "./components/AdminRoute";
 import ChatbotWidget from "./components/ChatbotWidget";
@@ -32,6 +35,17 @@ function RootRedirect() {
   return <Navigate to="/login" replace />;
 }
 
+function AuthenticatedChatbot() {
+  useLocation(); // re-check auth when route changes (e.g. logout → login)
+  const email = localStorage.getItem("email");
+  const role = localStorage.getItem("role");
+  const loggedIn =
+    Boolean(email) && (role === "buyer" || role === "admin");
+
+  if (!loggedIn) return null;
+  return <ChatbotWidget />;
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -43,6 +57,10 @@ function App() {
           {/* Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          {/* Public SEO / parasite landing pages */}
+          <Route path="/discover" element={<DiscoverIndex />} />
+          <Route path="/discover/:slug" element={<DiscoverArticle />} />
 
           {/* Buyer */}
           <Route path="/home" element={<BuyerRoute><Home /></BuyerRoute>} />
@@ -61,11 +79,12 @@ function App() {
           <Route path="/admin-users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
           <Route path="/admin-faq" element={<AdminRoute><AdminFaq /></AdminRoute>} />
           <Route path="/admin-analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+          <Route path="/admin-seo" element={<AdminRoute><AdminParasiteSeo /></AdminRoute>} />
 
           <Route path="*" element={<RootRedirect />} />
         </Routes>
       </Elements>
-      <ChatbotWidget />
+      <AuthenticatedChatbot />
     </BrowserRouter>
   );
 }

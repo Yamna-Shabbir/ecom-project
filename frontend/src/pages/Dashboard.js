@@ -71,6 +71,11 @@ function Dashboard() {
               <h3>Customer questions</h3>
               <p>Answer FAQs and publish to shoppers</p>
             </Link>
+            <Link to="/admin-seo" className="dashboard-tile">
+              <div className="dashboard-tile-icon">🔗</div>
+              <h3>Parasite SEO</h3>
+              <p>Copy posts for Pinterest, Medium, Reddit & more</p>
+            </Link>
           </div>
         </>
       )}
